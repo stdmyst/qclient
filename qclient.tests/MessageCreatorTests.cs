@@ -2,7 +2,7 @@
 using System.Web;
 using qclient.QClient.Implementations;
 
-namespace qclient.tests.Models;
+namespace qclient.tests;
 
 public class MessageCreatorTests
 {
