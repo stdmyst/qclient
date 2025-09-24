@@ -1,0 +1,5 @@
+launchSettings.json
+*.DotSettings.user
+.idea
+bin
+obj

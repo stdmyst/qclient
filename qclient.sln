@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "qclient", "qclient\qclient.csproj", "{175DB271-D916-4EB5-BD97-063432D7DD8E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "qclient.tests", "qclient.tests\qclient.tests.csproj", "{539038B9-7DC4-46D9-BF55-42238248072B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "qclient.api", "qclient.api\qclient.api.csproj", "{54CD79BD-5A18-4B81-90AD-E0B0FDA3A9BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{175DB271-D916-4EB5-BD97-063432D7DD8E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{175DB271-D916-4EB5-BD97-063432D7DD8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{175DB271-D916-4EB5-BD97-063432D7DD8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{175DB271-D916-4EB5-BD97-063432D7DD8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{539038B9-7DC4-46D9-BF55-42238248072B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{539038B9-7DC4-46D9-BF55-42238248072B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{539038B9-7DC4-46D9-BF55-42238248072B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{539038B9-7DC4-46D9-BF55-42238248072B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54CD79BD-5A18-4B81-90AD-E0B0FDA3A9BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54CD79BD-5A18-4B81-90AD-E0B0FDA3A9BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54CD79BD-5A18-4B81-90AD-E0B0FDA3A9BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54CD79BD-5A18-4B81-90AD-E0B0FDA3A9BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
