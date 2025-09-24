@@ -2,12 +2,19 @@
 
 public class QueryParameters(Dictionary<string, string>? parameters = null)
 {
+    private const char QueryStartSymbol = '?';
+        
     public Dictionary<string, string> Storage { get; set; } = parameters ??= new();
 
     public string AsUriString()
-        => Storage.Count == 0
-            ? ""
-            : "/?" + String.Join("&", Storage.Select(p => $"{p.Key}={p.Value}").ToList());
+    {
+        if (Storage.Count == 0)
+            return String.Empty;
+        
+        var query = QueryStartSymbol + String.Join("&", Storage.Select(p => $"{p.Key}={p.Value}").ToList());
+
+        return query;
+    }
 
     public void UpdateFromUri(Uri uri)
     {
@@ -16,8 +23,12 @@ public class QueryParameters(Dictionary<string, string>? parameters = null)
     }
     
     private KeyValuePair<string, string>[] GetKeyValuePairsFromUri(Uri uri)
-        => uri.Query.Trim('?').Split('&') 
-            .Select(p => p.Split('=')).Select(p => KeyValuePair.Create(p[0], p[1]))
+        => uri.Query.Trim('?').Split('&', StringSplitOptions.RemoveEmptyEntries) 
+            
+            .Select(p => p.Split('=', StringSplitOptions.TrimEntries))
+            .Where(p => p.Length == 2)
+            
+            .Select(p=> KeyValuePair.Create(p[0], p[1]))
             .ToArray();
     
     private void UpdateQueryParametersByKeyValuePairs(KeyValuePair<string, string>[] queries)

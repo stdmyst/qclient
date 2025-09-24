@@ -2,7 +2,7 @@
 using System.Web;
 using qclient.QClient.Implementations;
 
-namespace qclient.tests;
+namespace qclient.tests.Models;
 
 public class MessageCreatorTests
 {
@@ -56,6 +56,38 @@ public class MessageCreatorTests
         messageCreator.UpdatePropertiesFromUriString(uri);
         
         Assert.Equal(firstId, messageCreator.QueryParameters.Storage[bothIdsKey]);
+    }
+    
+    [Theory]
+    [InlineData("name", "email", "john.due@qclient.com")]
+    [InlineData("id", "name", "john")]
+    public void UpdatePropertiesFromUriString_KeyWithoutValuePassedFirst_SkipIt(string firstKey, string secondKey, string secondValue)
+    {
+        var uri = $"http://localhost:8080/api/users?{firstKey}&{secondKey}={secondValue}";
+        var messageCreator = new MessageCreator();
+
+        messageCreator.UpdatePropertiesFromUriString(uri);
+        var isFirstPresent = messageCreator.QueryParameters.Storage.TryGetValue(firstKey, out _);
+        var isSecondPresent = messageCreator.QueryParameters.Storage.TryGetValue(secondKey, out _);
+        
+        Assert.False(isFirstPresent);
+        Assert.True(isSecondPresent);
+    }
+    
+    [Theory]
+    [InlineData("email", "john.due@qclient.com", "name")]
+    [InlineData("name", "john", "id")]
+    public void UpdatePropertiesFromUriString_KeyWithoutValuePassedSecond_SkipIt(string firstKey, string firstValue, string secondKey)
+    {
+        var uri = $"http://localhost:8080/api/users?{firstKey}={firstValue}&{firstKey}";
+        var messageCreator = new MessageCreator();
+
+        messageCreator.UpdatePropertiesFromUriString(uri);
+        var isFirstPresent = messageCreator.QueryParameters.Storage.TryGetValue(firstKey, out _);
+        var isSecondPresent = messageCreator.QueryParameters.Storage.TryGetValue(secondKey, out _);
+        
+        Assert.True(isFirstPresent);
+        Assert.False(isSecondPresent);
     }
     
     private string SelectLocalPathFromStringUri(string uriString) => new Uri(uriString).LocalPath;

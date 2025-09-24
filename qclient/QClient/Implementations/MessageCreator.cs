@@ -10,7 +10,6 @@ public class MessageCreator : IMessageCreator
     public string UriLocalPath { get; private set; } = String.Empty;
     public QueryParameters QueryParameters { get; } = new();
     
-    
     public HttpRequestMessage GetHttpRequestMessage(HttpMethod method)
     {
         var parameters = GetUriWithQueryParams();
