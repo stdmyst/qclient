@@ -7,9 +7,9 @@ namespace qclient.QClient.Implementations;
 
 public class Client : IClient
 {
-    public async Task<ClientResponse<T>> RequestAsync<T>(HttpClient httpClient, IMessageCreator messageCreator) where T : class
+    public async Task<ClientResponse<T>> RequestAsync<T>(HttpClient httpClient, HttpRequestMessage message) where T : class
     {
-        var httpResponse = await httpClient.SendAsync(messageCreator.GetHttpRequestMessage(HttpMethod.Get));
+        var httpResponse = await httpClient.SendAsync(message);
         var clientResponse = new ClientResponse<T>();
         if (httpResponse.IsSuccessStatusCode)
         {
@@ -46,7 +46,7 @@ public class Client : IClient
         {
             while (!responseObj.IsLast)
             {
-                var response = await RequestAsync<T>(httpClient, messageCreator);
+                var response = await RequestAsync<T>(httpClient, messageCreator.GetHttpRequestMessage(HttpMethod.Get));
                 if (response.ResponseStatus == ClientResponseStatus.Error)
                 {
                     clientResponse.ResponseStatus = ClientResponseStatus.Error;

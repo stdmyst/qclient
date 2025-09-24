@@ -1,11 +1,10 @@
 using qclient.tests.Models;
-using qclient.QClient;
 using qclient.QClient.Enums;
 using qclient.QClient.Implementations;
 
 namespace qclient.tests;
 
-public class ClientTests()
+public class ClientTests
 {
     public class RequestAsync(HttpClientFixture clientFixture) : IClassFixture<HttpClientFixture>
     {
@@ -19,7 +18,7 @@ public class ClientTests()
                 .SetOrUpdateQueryParameter("id", id.ToString());
             var rest = new Client();
         
-            var userResp = await rest.RequestAsync<User>(clientFixture.Client, messageCreator);
+            var userResp = await rest.RequestAsync<User>(clientFixture.Client, messageCreator.GetHttpRequestMessage(HttpMethod.Get));
             var status =  userResp.ResponseStatus;
             var userId = userResp.SerializedResponse?.Id;
         
@@ -36,7 +35,7 @@ public class ClientTests()
                 .SetOrUpdateQueryParameter("id", id.ToString());
             var rest = new Client();
         
-            var userResp = await rest.RequestAsync<User>(clientFixture.Client, messageCreator);
+            var userResp = await rest.RequestAsync<User>(clientFixture.Client, messageCreator.GetHttpRequestMessage(HttpMethod.Get));
             var status =  userResp.ResponseStatus;
             var user = userResp.SerializedResponse;
         
@@ -50,7 +49,7 @@ public class ClientTests()
             var messageCreator = new MessageCreator().SetEndpoint("api/users/");
             var rest = new Client();
         
-            var usersResp = await rest.RequestAsync<User[]>(clientFixture.Client, messageCreator);
+            var usersResp = await rest.RequestAsync<User[]>(clientFixture.Client, messageCreator.GetHttpRequestMessage(HttpMethod.Get));
             var status =  usersResp.ResponseStatus;
             var users = usersResp.SerializedResponse;
         
