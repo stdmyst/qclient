@@ -2,7 +2,7 @@
 
 public class QueryParameters(Dictionary<string, string>? parameters = null)
 {
-    private const char QueryStartSymbol = '?';
+    private const char StartQuerySymbol = '?';
         
     public Dictionary<string, string> Storage { get; set; } = parameters ??= new();
 
@@ -11,7 +11,7 @@ public class QueryParameters(Dictionary<string, string>? parameters = null)
         if (Storage.Count == 0)
             return String.Empty;
         
-        var query = QueryStartSymbol + String.Join("&", Storage.Select(p => $"{p.Key}={p.Value}").ToList());
+        var query = StartQuerySymbol + String.Join("&", Storage.Select(p => $"{p.Key}={p.Value}").ToList());
 
         return query;
     }

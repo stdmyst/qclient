@@ -2,5 +2,5 @@
 
 public interface IPagin
 {
-    string? Token { get; }
+    bool IsLast { get; set; }
 }

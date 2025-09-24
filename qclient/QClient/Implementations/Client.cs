@@ -7,9 +7,9 @@ namespace qclient.QClient.Implementations;
 
 public class Client : IClient
 {
-    public async Task<ClientResponse<T>> RequestAsync<T>(HttpClient httpClient, HttpRequestMessage message) where T : class
+    public async Task<ClientResponse<T>> RequestAsync<T>(HttpClient httpClient, IMessageCreator messageCreator) where T : class
     {
-        var httpResponse = await httpClient.SendAsync(message);
+        var httpResponse = await httpClient.SendAsync(messageCreator.GetHttpRequestMessage(HttpMethod.Get));
         var clientResponse = new ClientResponse<T>();
         if (httpResponse.IsSuccessStatusCode)
         {
@@ -29,6 +29,41 @@ public class Client : IClient
             clientResponse.ResponseStatus = ClientResponseStatus.Error;
         }
         
+        return clientResponse;
+    }
+
+    public async Task<ClientResponse<IList<T>>> RequestAsyncWithPagination<T>(HttpClient httpClient, IMessageCreator messageCreator, Func<IMessageCreator, T, IMessageCreator> onNextRequest)
+        where T : class, IPagin, new()
+    {
+        var clientResponse = new ClientResponse<IList<T>>
+        {
+            ResponseStatus = ClientResponseStatus.Success,
+            SerializedResponse = new List<T>()
+        };
+        T responseObj = new();
+
+        try
+        {
+            while (!responseObj.IsLast)
+            {
+                var response = await RequestAsync<T>(httpClient, messageCreator);
+                if (response.ResponseStatus == ClientResponseStatus.Error)
+                {
+                    clientResponse.ResponseStatus = ClientResponseStatus.Error;
+                    clientResponse.SerializedResponse = null;
+                    break;
+                }
+                responseObj = response.SerializedResponse!;
+                clientResponse.SerializedResponse.Add(responseObj);
+            
+                messageCreator = onNextRequest(messageCreator, responseObj);
+            }
+        }
+        catch
+        {
+            clientResponse.ResponseStatus = ClientResponseStatus.Error;
+        }
+
         return clientResponse;
     }
 }

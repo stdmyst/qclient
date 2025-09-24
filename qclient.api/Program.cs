@@ -21,6 +21,7 @@ var users = new User[]
     new User(1, "John", "john.due@qclient.com"),
     new User(2, "Chad", "chad.due@qclient.com")
 };
+var paginationToken = "sf1123sFSSSS!F";
 
 app.MapGet("/api/user", (int id) =>
     {
@@ -32,8 +33,18 @@ app.MapGet("/api/user", (int id) =>
     .WithName("GetUser")
     .WithOpenApi();
 
-app.MapGet("/api/users",()=> Results.Ok(users))
+app.MapGet("/api/users", () => Results.Ok(users))
     .WithName("GetUsers")
+    .WithOpenApi();
+
+app.MapGet("/api/usersWithPagin", (string token = "") =>
+    {
+        if (string.IsNullOrEmpty(token))
+            return Results.Ok(new { Users = new List<User> { users[0] }, PaginationToken = paginationToken, IsLast = false });
+        
+        return  Results.Ok(new { Users = new List<User> { users[1] }, IsLast = true });
+    })
+    .WithName("GetUsersWithPagin")
     .WithOpenApi();
 
 app.Run();
