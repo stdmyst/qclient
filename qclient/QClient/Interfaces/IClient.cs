@@ -1,4 +1,6 @@
-﻿namespace qclient.QClient;
+﻿using qclient.QClient.Implementations;
+
+namespace qclient.QClient.Interfaces;
 
 public interface IClient
 {

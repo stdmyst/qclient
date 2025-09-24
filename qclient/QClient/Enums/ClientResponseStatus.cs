@@ -1,4 +1,4 @@
-﻿namespace qclient.QClient;
+﻿namespace qclient.QClient.Enums;
 
 public enum ClientResponseStatus
 {

@@ -1,6 +1,9 @@
 ﻿using System.Text.Json;
+using qclient.QClient.Constants;
+using qclient.QClient.Enums;
+using qclient.QClient.Interfaces;
 
-namespace qclient.QClient;
+namespace qclient.QClient.Implementations;
 
 public class Client : IClient
 {
@@ -12,7 +15,7 @@ public class Client : IClient
         {
             try
             {
-                var package = await JsonSerializer.DeserializeAsync<T>(httpResponse.Content.ReadAsStreamAsync().Result, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true });
+                var package = await JsonSerializer.DeserializeAsync<T>(httpResponse.Content.ReadAsStreamAsync().Result, SerializationConstants.JsonSerializerOptionsDefault);
                 clientResponse.SerializedResponse = package;
                 clientResponse.ResponseStatus = ClientResponseStatus.Success;
             }

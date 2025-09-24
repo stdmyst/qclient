@@ -18,7 +18,8 @@ app.UseHttpsRedirection();
 
 var users = new User[]
 {
-    new User(1, "John", "john.due@qclient.com")
+    new User(1, "John", "john.due@qclient.com"),
+    new User(2, "Chad", "chad.due@qclient.com")
 };
 
 app.MapGet("/api/user", (int id) =>
@@ -29,6 +30,10 @@ app.MapGet("/api/user", (int id) =>
         return Results.Ok(user);
     }) 
     .WithName("GetUser")
+    .WithOpenApi();
+
+app.MapGet("/api/users",()=> Results.Ok(users))
+    .WithName("GetUsers")
     .WithOpenApi();
 
 app.Run();
