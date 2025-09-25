@@ -11,24 +11,31 @@ public class Client : IClient
     {
         var httpResponse = await httpClient.SendAsync(message);
         var clientResponse = new ClientResponse<T>();
-        if (httpResponse.IsSuccessStatusCode)
+        try
         {
-            try
+            httpResponse.EnsureSuccessStatusCode();
+
+            var stream = await httpResponse.Content.ReadAsStreamAsync();
+            var package = await JsonSerializer.DeserializeAsync<T>(stream, SerializationConstants.JsonSerializerOptionsDefault);
+            if (package == null)
             {
-                var package = await JsonSerializer.DeserializeAsync<T>(httpResponse.Content.ReadAsStreamAsync().Result, SerializationConstants.JsonSerializerOptionsDefault);
+                SetErrorWithException(clientResponse, new JsonException("Can not deserialize package."));
+            }
+            else
+            {
                 clientResponse.SerializedResponse = package;
                 clientResponse.ResponseStatus = ClientResponseStatus.Success;
             }
-            catch (JsonException e)
-            {
-                clientResponse.ResponseStatus = ClientResponseStatus.Error;
-            }
         }
-        else
+        catch (HttpRequestException e)
         {
-            clientResponse.ResponseStatus = ClientResponseStatus.Error;
+            SetErrorWithException(clientResponse, e);
         }
-        
+        catch (Exception e)
+        {
+            SetErrorWithException(clientResponse, e);
+        }
+
         return clientResponse;
     }
 
@@ -40,17 +47,18 @@ public class Client : IClient
             ResponseStatus = ClientResponseStatus.Success,
             SerializedResponse = new List<T>()
         };
-        T responseObj = new();
 
         try
         {
+            T responseObj;
             do
             {
                 var response = await RequestAsync<T>(httpClient, messageCreator.GetHttpRequestMessage(HttpMethod.Get));
                 if (response.ResponseStatus == ClientResponseStatus.Error)
                 {
-                    clientResponse.ResponseStatus = ClientResponseStatus.Error;
+                    SetErrorWithException(clientResponse, response.InnerException);
                     clientResponse.SerializedResponse = null;
+                    
                     break;
                 }
 
@@ -61,11 +69,17 @@ public class Client : IClient
             }
             while (responseObj.CanBeRequested);
         }
-        catch
+        catch (Exception e)
         {
-            clientResponse.ResponseStatus = ClientResponseStatus.Error;
+            SetErrorWithException(clientResponse, e);
         }
 
         return clientResponse;
+    }
+
+    private void SetErrorWithException<T>(ClientResponse<T> response, Exception? e) where T : class
+    {
+        response.ResponseStatus = ClientResponseStatus.Error;
+        response.InnerException = e;
     }
 }
