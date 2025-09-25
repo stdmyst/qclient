@@ -40,21 +40,11 @@ app.MapGet("/api/users", () => Results.Ok(users))
 app.MapGet("/api/usersWithPagin", (string token = "") =>
     {
         if (string.IsNullOrEmpty(token))
-            return Results.Ok(new { Users = new List<User> { users[0] }, PaginationToken = paginationToken, IsLast = false });
-        
-        return  Results.Ok(new { Users = new List<User> { users[1] }, IsLast = true });
-    })
-    .WithName("GetUsersWithPagin")
-    .WithOpenApi();
-
-app.MapGet("/api/usersWithPaginWithoutIsLastProperty", (string token = "") =>
-    {
-        if (string.IsNullOrEmpty(token))
             return Results.Ok(new { Users = new List<User> { users[0] }, PaginationToken = paginationToken });
         
-        return  Results.Ok(new { Users = new List<User> { users[1] } });
+        return  Results.Ok(new { Users = new List<User> { users[1] }});
     })
-    .WithName("GetUsersWithPaginWithoutIsLastProperty")
+    .WithName("GetUsersWithPagin")
     .WithOpenApi();
 
 app.Run();

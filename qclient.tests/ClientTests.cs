@@ -91,7 +91,7 @@ public class ClientTests
         [Fact]
         public async Task NoStopLogicProvided_OnlyFirstPageRequested()
         {
-            var messageCreator = new MessageCreator().SetEndpoint("api/usersWithPaginWithoutIsLastProperty/");
+            var messageCreator = new MessageCreator().SetEndpoint("api/usersWithPagin/");
             var rest = new Client();
             
             var resp = await rest.RequestAsyncWithPagination<PackageWithPagin>(
