@@ -2,5 +2,5 @@
 
 public interface IPagin
 {
-    bool IsLast { get; set; }
+    bool CanBeRequested { get; set; }
 }

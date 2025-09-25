@@ -71,7 +71,10 @@ public class ClientTests
                 {
                     var token = package.PaginationToken;
                     if (token != null)
+                    {
                         mc.SetOrUpdateQueryParameter("token", token);
+                        package.CanBeRequested = true;
+                    }
                     
                     return mc;
                 });
@@ -83,6 +86,30 @@ public class ClientTests
             Assert.True(users != null);
             Assert.True(users[0].Id == 1);
             Assert.True(users[1].Id == 2);
+        }
+        
+        [Fact]
+        public async Task NoStopLogicProvided_OnlyFirstPageRequested()
+        {
+            var messageCreator = new MessageCreator().SetEndpoint("api/usersWithPaginWithoutIsLastProperty/");
+            var rest = new Client();
+            
+            var resp = await rest.RequestAsyncWithPagination<PackageWithPagin>(
+                clientFixture.Client, messageCreator, (mc, package) =>
+                {
+                    var token = package.PaginationToken;
+                    if (token != null)
+                        mc.SetOrUpdateQueryParameter("token", token);
+                    return mc;
+                });
+            
+            var status = resp.ResponseStatus;
+            var users = resp.SerializedResponse?.SelectMany(package => package.Users).ToArray();
+            
+            Assert.Equal(ClientResponseStatus.Success, status);
+            Assert.True(users != null);
+            Assert.True(users.Length == 1);
+            Assert.True(users[0].Id == 1);
         }
     }
 }

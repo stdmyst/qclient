@@ -6,5 +6,5 @@ public class PackageWithPagin : IPagin
 {
     public IList<User> Users { get; set; }
     public string? PaginationToken { get; set; }
-    public bool IsLast { get; set; } = false;
+    public bool CanBeRequested { get; set; }
 }

@@ -47,6 +47,16 @@ app.MapGet("/api/usersWithPagin", (string token = "") =>
     .WithName("GetUsersWithPagin")
     .WithOpenApi();
 
+app.MapGet("/api/usersWithPaginWithoutIsLastProperty", (string token = "") =>
+    {
+        if (string.IsNullOrEmpty(token))
+            return Results.Ok(new { Users = new List<User> { users[0] }, PaginationToken = paginationToken });
+        
+        return  Results.Ok(new { Users = new List<User> { users[1] } });
+    })
+    .WithName("GetUsersWithPaginWithoutIsLastProperty")
+    .WithOpenApi();
+
 app.Run();
 
 record User(int Id, string Name, string Email)

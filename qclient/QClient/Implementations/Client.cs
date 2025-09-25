@@ -44,7 +44,7 @@ public class Client : IClient
 
         try
         {
-            while (!responseObj.IsLast)
+            do
             {
                 var response = await RequestAsync<T>(httpClient, messageCreator.GetHttpRequestMessage(HttpMethod.Get));
                 if (response.ResponseStatus == ClientResponseStatus.Error)
@@ -53,11 +53,13 @@ public class Client : IClient
                     clientResponse.SerializedResponse = null;
                     break;
                 }
+
                 responseObj = response.SerializedResponse!;
                 clientResponse.SerializedResponse.Add(responseObj);
-            
+
                 messageCreator = onNextRequest(messageCreator, responseObj);
             }
+            while (responseObj.CanBeRequested);
         }
         catch
         {
