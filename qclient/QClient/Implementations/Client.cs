@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using qclient.QClient.Constants;
 using qclient.QClient.Enums;
+using qclient.QClient.Exceptions;
 using qclient.QClient.Interfaces;
 
 namespace qclient.QClient.Implementations;
@@ -54,13 +55,8 @@ public class Client : IClient
             do
             {
                 var response = await RequestAsync<T>(httpClient, messageCreator.GetHttpRequestMessage(HttpMethod.Get));
-                if (response.ResponseStatus == ClientResponseStatus.Error)
-                {
-                    SetErrorWithException(clientResponse, response.InnerException);
-                    clientResponse.SerializedResponse = null;
-                    
-                    break;
-                }
+
+                response.ValidateResponse();
 
                 responseObj = response.SerializedResponse!;
                 clientResponse.SerializedResponse.Add(responseObj);
@@ -68,6 +64,10 @@ public class Client : IClient
                 messageCreator = onNextRequest(messageCreator, responseObj);
             }
             while (responseObj.CanBeRequested);
+        }
+        catch (ClientResponseValidateException<T> e)
+        {
+            SetErrorWithException(clientResponse, e.Response.InnerException);
         }
         catch (Exception e)
         {
