@@ -6,7 +6,7 @@ public class HttpClientFixture : IDisposable
     
     public HttpClientFixture()
     {
-        Client =  new HttpClient();
+        Client = new HttpClient();
         Client.BaseAddress = new Uri("https://localhost:7227");
     }
 

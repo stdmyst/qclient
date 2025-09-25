@@ -13,5 +13,6 @@ public interface IMessageCreator
     IMessageCreator SetAuthenticationHeaderValue(AuthenticationHeaderValue auth);
     IMessageCreator UpdatePropertiesFromUriString(string uri);
     IMessageCreator SetOrUpdateQueryParameter(string key, string value);
+    IMessageCreator RemoveQueryParameter(string key);
     T GetAs<T>() where T : class, IMessageCreator;
 }

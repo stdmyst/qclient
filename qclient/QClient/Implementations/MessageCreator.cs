@@ -55,6 +55,12 @@ public class MessageCreator : IMessageCreator
         return this;
     }
 
+    public IMessageCreator RemoveQueryParameter(string key)
+    {
+        QueryParameters.Storage.Remove(key);
+        return this;
+    }
+
     private string GetUriWithQueryParams() => UriLocalPath.Trim('/') + QueryParameters.AsUriString();
     
     public T GetAs<T>() where T : class, IMessageCreator => (this as T)!;
