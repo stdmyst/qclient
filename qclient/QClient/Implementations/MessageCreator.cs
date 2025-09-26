@@ -61,7 +61,7 @@ public class MessageCreator : IMessageCreator
         return this;
     }
 
-    private string GetUriWithQueryParams() => UriLocalPath.Trim('/') + QueryParameters.AsUriString();
+    public string GetUriWithQueryParams() => UriLocalPath.Trim('/') + QueryParameters.AsUriString();
     
     public T GetAs<T>() where T : class, IMessageCreator => (this as T)!;
 }

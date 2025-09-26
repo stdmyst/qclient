@@ -14,5 +14,6 @@ public interface IMessageCreator
     IMessageCreator UpdatePropertiesFromUriString(string uri);
     IMessageCreator SetOrUpdateQueryParameter(string key, string value);
     IMessageCreator RemoveQueryParameter(string key);
+    string GetUriWithQueryParams();
     T GetAs<T>() where T : class, IMessageCreator;
 }
