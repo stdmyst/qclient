@@ -40,8 +40,8 @@ public class Client : IClient
         return clientResponse;
     }
 
-    public async Task<ClientResponse<IList<T>>> RequestAsyncWithPagination<T>(HttpClient httpClient, IMessageCreator messageCreator, Func<IMessageCreator, T, IMessageCreator> onNextRequest)
-        where T : class, IPagin, new()
+    public async Task<ClientResponse<IList<T>>> RequestAsyncWithPagination<T>(HttpClient httpClient, IMessageCreator mc, IPaginController<T> paginController)
+        where T : class
     {
         var clientResponse = new ClientResponse<IList<T>>
         {
@@ -52,18 +52,19 @@ public class Client : IClient
         try
         {
             T responseObj;
-            do
+            while (true)
             {
-                var response = await RequestAsync<T>(httpClient, messageCreator.GetHttpRequestMessage(HttpMethod.Get));
+                var response = await RequestAsync<T>(httpClient, mc.GetHttpRequestMessage(HttpMethod.Get));
 
                 response.ValidateResponse();
 
                 responseObj = response.SerializedResponse!;
                 clientResponse.SerializedResponse.Add(responseObj);
-
-                messageCreator = onNextRequest(messageCreator, responseObj);
+                
+                if (!paginController.ShouldContinue(responseObj))
+                    break;
+                mc = paginController.OnNext(mc, responseObj);
             }
-            while (responseObj.CanBeRequested);
         }
         catch (ClientResponseValidateException<T> e)
         {
