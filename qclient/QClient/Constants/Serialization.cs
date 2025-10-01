@@ -2,7 +2,7 @@
 
 namespace qclient.QClient.Constants;
 
-public static class SerializationConstants
+public static class Serialization
 {
     public static readonly JsonSerializerOptions JsonSerializerOptionsDefault = new()
     { 

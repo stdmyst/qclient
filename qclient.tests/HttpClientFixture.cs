@@ -1,23 +1,26 @@
-﻿using qclient.tests.Models;
+﻿using qclient.QClient.Implementations;
+using qclient.tests.Models;
 
 namespace qclient.tests;
 
 public class HttpClientFixture : IDisposable
 {
-    public readonly HttpClient Client;
-    public readonly PaginControllerShouldContinue PaginControllerShouldContinue;
-    public readonly PaginControllerAlwaysContinue PaginControllerAlwaysContinue;
+    public readonly HttpClient HttpClient;
+    public readonly Client QClient;
+    public readonly PaginationShouldContinue PaginationShouldContinue;
+    public readonly PaginationAlwaysContinue PaginationAlwaysContinue;
     
     public HttpClientFixture()
     {
-        Client = new HttpClient();
-        Client.BaseAddress = new Uri("https://localhost:7227");
-        PaginControllerShouldContinue = new PaginControllerShouldContinue();
-        PaginControllerAlwaysContinue = new PaginControllerAlwaysContinue();
+        HttpClient = new HttpClient();
+        HttpClient.BaseAddress = new Uri("https://localhost:7227");
+        QClient =  new Client(HttpClient);
+        PaginationShouldContinue = new PaginationShouldContinue();
+        PaginationAlwaysContinue = new PaginationAlwaysContinue();
     }
 
     public void Dispose()
     {
-        Client.Dispose();
+        HttpClient.Dispose();
     }
 }

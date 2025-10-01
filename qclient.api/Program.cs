@@ -49,6 +49,4 @@ app.MapGet("/api/usersWithPagin", (string token = "") =>
 
 app.Run();
 
-record User(int Id, string Name, string Email)
-{
-}
+record User(int Id, string Name, string Email);

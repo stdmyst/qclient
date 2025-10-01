@@ -2,12 +2,12 @@
 
 namespace qclient.tests.Models;
 
-public class PaginControllerShouldContinue : IPaginController<PackageWithPagin>
+public class PaginationShouldContinue : IPaginationController<PackageWithPagination>
 {
-    public bool ShouldContinue(PackageWithPagin response)
+    public bool ShouldContinue(PackageWithPagination response)
         => response.PaginationToken != null;
 
-    public IMessageCreator OnNext(IMessageCreator mc, PackageWithPagin response)
+    public IMessageCreator OnNext(IMessageCreator mc, PackageWithPagination response)
     {
         var token = response.PaginationToken ?? throw new NullReferenceException("Next page token is null.");
         return mc.SetOrUpdateQueryParameter("token", token);

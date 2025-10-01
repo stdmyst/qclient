@@ -1,50 +1,51 @@
 ﻿namespace qclient.QClient.Implementations;
 
-public class QueryParameters(Dictionary<string, string>? parameters = null)
+public class QueryParameters
 {
     private const char StartQuerySymbol = '?';
         
-    public Dictionary<string, string> Storage { get; set; } = parameters ??= new();
+    public Dictionary<string, string> Storage { get; } = new();
 
     public string AsUriString()
     {
         if (Storage.Count == 0)
             return String.Empty;
-        
-        var query = StartQuerySymbol + String.Join("&", Storage.Select(p => $"{p.Key}={p.Value}").ToList());
+
+        string[] queryParts = Storage.Select(p => $"{p.Key}={p.Value}").ToArray();
+        string query = StartQuerySymbol + String.Join("&", queryParts);
 
         return query;
     }
 
     public void UpdateFromUri(Uri uri)
     {
-        var queries = GetKeyValuePairsFromUri(uri);
-        UpdateQueryParametersByKeyValuePairs(queries);
+        var queries = GetQueriesAsKeyValuePairs(uri);
+        UpdateQueryParameters(queries);
+    }
+
+    private KeyValuePair<string, string>[] GetQueriesAsKeyValuePairs(Uri uri)
+    {
+        var parts = uri.Query.Trim('?')
+            .Split('&', StringSplitOptions.RemoveEmptyEntries);
+        
+        var queries = parts.Select(p => p.Split('=', StringSplitOptions.TrimEntries))
+            .Where(p => p.Length == 2);
+        
+        return queries.Select(p => KeyValuePair.Create(p[0], p[1])).ToArray();
     }
     
-    private KeyValuePair<string, string>[] GetKeyValuePairsFromUri(Uri uri)
-        => uri.Query.Trim('?').Split('&', StringSplitOptions.RemoveEmptyEntries) 
-            
-            .Select(p => p.Split('=', StringSplitOptions.TrimEntries))
-            .Where(p => p.Length == 2)
-            
-            .Select(p=> KeyValuePair.Create(p[0], p[1]))
-            .ToArray();
-    
-    private void UpdateQueryParametersByKeyValuePairs(KeyValuePair<string, string>[] queries)
+    private void UpdateQueryParameters(KeyValuePair<string, string>[] queries)
     {
         var keys = new string[queries.Length];
         var currentIndex = 0;
         foreach (var query in queries)
         {
-            if (!IsStringCollectionContainsValue(keys, query.Key))
-            {
-                keys[currentIndex] = query.Key;
-                currentIndex++;
-                Storage[query.Key] = query.Value;
-            }
+            if (keys.Contains(query.Key))
+                continue;
+            
+            keys[currentIndex] = query.Key;
+            currentIndex++;
+            Storage[query.Key] = query.Value;
         }
     }
-    
-    private bool IsStringCollectionContainsValue(ICollection<string> collection, string value) => collection.Contains(value);
 }

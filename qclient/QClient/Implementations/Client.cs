@@ -1,86 +1,39 @@
 ﻿using System.Text.Json;
 using qclient.QClient.Constants;
-using qclient.QClient.Enums;
-using qclient.QClient.Exceptions;
 using qclient.QClient.Interfaces;
 
 namespace qclient.QClient.Implementations;
 
-public class Client : IClient
+public class Client(HttpClient httpClient, JsonSerializerOptions? jsonOptions = null) : IClient
 {
-    public async Task<ClientResponse<T>> RequestAsync<T>(HttpClient httpClient, HttpRequestMessage message) where T : class
+    private readonly JsonSerializerOptions _jsonOptions = jsonOptions ?? Serialization.JsonSerializerOptionsDefault;
+    
+    public async Task<T> RequestAsync<T>(HttpRequestMessage message, CancellationToken ct)
     {
-        var httpResponse = await httpClient.SendAsync(message);
-        var clientResponse = new ClientResponse<T>();
-        try
-        {
-            httpResponse.EnsureSuccessStatusCode();
-
-            var stream = await httpResponse.Content.ReadAsStreamAsync();
-            var package = await JsonSerializer.DeserializeAsync<T>(stream, SerializationConstants.JsonSerializerOptionsDefault);
-            if (package == null)
-            {
-                SetErrorWithException(clientResponse, new JsonException("Can not deserialize package."));
-            }
-            else
-            {
-                clientResponse.SerializedResponse = package;
-                clientResponse.ResponseStatus = ClientResponseStatus.Success;
-            }
-        }
-        catch (HttpRequestException e)
-        {
-            SetErrorWithException(clientResponse, e);
-        }
-        catch (Exception e)
-        {
-            SetErrorWithException(clientResponse, e);
-        }
-
-        return clientResponse;
+        var httpResponse = await httpClient.SendAsync(message, ct);
+        httpResponse.EnsureSuccessStatusCode();
+        
+        var stream = await httpResponse.Content.ReadAsStreamAsync(ct);
+        var package = await JsonSerializer.DeserializeAsync<T>(stream, _jsonOptions, ct) 
+                      ?? throw new JsonException($"Can not deserialize {typeof(T).Name}.");
+        
+        return package;
     }
-
-    public async Task<ClientResponse<IList<T>>> RequestAsyncWithPagination<T>(HttpClient httpClient, IMessageCreator mc, IPaginController<T> paginController)
-        where T : class
+    
+    public async Task<IList<T>> RequestAsyncWithPagination<T>(IMessageCreator mc, IPaginationController<T> paginController, CancellationToken ct)
     {
-        var clientResponse = new ClientResponse<IList<T>>
+        var result = new List<T>();
+        while (true)
         {
-            ResponseStatus = ClientResponseStatus.Success,
-            SerializedResponse = new List<T>()
-        };
-
-        try
-        {
-            T responseObj;
-            while (true)
-            {
-                var response = await RequestAsync<T>(httpClient, mc.GetHttpRequestMessage(HttpMethod.Get));
-
-                response.ValidateResponse();
-
-                responseObj = response.SerializedResponse!;
-                clientResponse.SerializedResponse.Add(responseObj);
-                
-                if (!paginController.ShouldContinue(responseObj))
-                    break;
-                mc = paginController.OnNext(mc, responseObj);
-            }
+            var response = await RequestAsync<T>(mc.GetHttpRequestMessage(HttpMethod.Get), ct);
+            result.Add(response);
+            
+            if (!paginController.ShouldContinue(response))
+                break;
+            
+            paginController.OnNext(mc, response);
         }
-        catch (ClientResponseValidateException<T> e)
-        {
-            SetErrorWithException(clientResponse, e.Response.InnerException);
-        }
-        catch (Exception e)
-        {
-            SetErrorWithException(clientResponse, e);
-        }
-
-        return clientResponse;
-    }
-
-    private void SetErrorWithException<T>(ClientResponse<T> response, Exception? e) where T : class
-    {
-        response.ResponseStatus = ClientResponseStatus.Error;
-        response.InnerException = e;
+        
+        return result;
     }
 }
