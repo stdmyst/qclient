@@ -5,11 +5,9 @@ using qclient.QClient.Interfaces;
 
 namespace qclient.QClient.Implementations;
 
-public class Client(ILogger<Client> logger, HttpClient httpClient, JsonSerializerOptions? jsonOptions = null) : IClient
+public class Client(ILogger<Client> logger) : IClient
 {
-    private readonly JsonSerializerOptions _jsonOptions = jsonOptions ?? Serialization.JsonSerializerOptionsDefault;
-    
-    public async Task<T> RequestAsync<T>(HttpRequestMessage message, CancellationToken ct)
+    public async Task<T> RequestAsync<T>(HttpClient httpClient, HttpRequestMessage message, CancellationToken ct, JsonSerializerOptions? jsonOptions = null)
     {
         try
         {
@@ -17,7 +15,7 @@ public class Client(ILogger<Client> logger, HttpClient httpClient, JsonSerialize
             httpResponse.EnsureSuccessStatusCode();
 
             var stream = await httpResponse.Content.ReadAsStreamAsync(ct);
-            var package = await JsonSerializer.DeserializeAsync<T>(stream, _jsonOptions, ct)
+            var package = await JsonSerializer.DeserializeAsync<T>(stream, jsonOptions ?? Defaults.JsonSerializerOptionsDefault, ct)
                           ?? throw new JsonException($"Can not deserialize {typeof(T).Name}.");
 
             return package;
@@ -35,12 +33,12 @@ public class Client(ILogger<Client> logger, HttpClient httpClient, JsonSerialize
         }
     }
     
-    public async Task<IEnumerable<T>> RequestAsyncWithPagination<T>(IMessageCreator mc, IPaginationController<T> paginController, CancellationToken ct)
+    public async Task<IEnumerable<T>> RequestAsyncWithPagination<T>(HttpClient httpClient, IMessageCreator mc, IPaginationController<T> paginController, CancellationToken ct, JsonSerializerOptions? jsonOptions = null)
     {
         var result = new List<T>();
         while (true)
         {
-            var response = await RequestAsync<T>(mc.GetHttpRequestMessage(HttpMethod.Get), ct);
+            var response = await RequestAsync<T>(httpClient, mc.GetHttpRequestMessage(HttpMethod.Get), ct, jsonOptions);
             result.Add(response);
             
             if (!paginController.ShouldContinue(response))

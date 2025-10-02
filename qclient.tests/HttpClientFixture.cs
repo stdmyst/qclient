@@ -17,7 +17,7 @@ public class HttpClientFixture : IDisposable
         HttpClient = new HttpClient();
         HttpClient.BaseAddress = new Uri("https://localhost:7227");
         var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        QClient = new Client(new Logger<Client>(loggerFactory), HttpClient);
+        QClient = new Client(new Logger<Client>(loggerFactory));
         PaginationShouldContinue = new PaginationShouldContinue();
         PaginationAlwaysContinue = new PaginationAlwaysContinue();
     }

@@ -14,7 +14,7 @@ public class ClientTests
         {
             var mc = new MessageCreator().SetEndpoint("api/users/");
             
-            var users = await clientFixture.QClient.RequestAsync<IList<User>>(mc.GetHttpRequestMessage(HttpMethod.Get), CancellationToken.None);
+            var users = await clientFixture.QClient.RequestAsync<IList<User>>(clientFixture.HttpClient, mc.GetHttpRequestMessage(HttpMethod.Get), CancellationToken.None);
             var count = users.Count();
             
             Assert.Equal(2, count);
@@ -29,7 +29,7 @@ public class ClientTests
         {
             var mc = new MessageCreator().SetEndpoint("api/user/").SetOrUpdateQueryParameter("id", id.ToString());
             
-            var user = await clientFixture.QClient.RequestAsync<User>(mc.GetHttpRequestMessage(HttpMethod.Get), CancellationToken.None);
+            var user = await clientFixture.QClient.RequestAsync<User>(clientFixture.HttpClient, mc.GetHttpRequestMessage(HttpMethod.Get), CancellationToken.None);
             
             Assert.Equal(user.Id, id);
         }
@@ -39,7 +39,7 @@ public class ClientTests
         public async Task NotExistedId_ThrowsWith404StatusCode(int id)
         {
             var mc = new MessageCreator().SetEndpoint("api/user/").SetOrUpdateQueryParameter("id", id.ToString());
-            var task = clientFixture.QClient.RequestAsync<User>(mc.GetHttpRequestMessage(HttpMethod.Get), CancellationToken.None);
+            var task = clientFixture.QClient.RequestAsync<User>(clientFixture.HttpClient, mc.GetHttpRequestMessage(HttpMethod.Get), CancellationToken.None);
             
             var exception = await Record.ExceptionAsync(() => task) as HttpRequestException;
         
@@ -51,7 +51,7 @@ public class ClientTests
         public async Task NotValidType_ThrowsJsonException()
         {
             var mc = new MessageCreator().SetEndpoint("api/user/").SetOrUpdateQueryParameter("id", "1");
-            var task = clientFixture.QClient.RequestAsync<int>(mc.GetHttpRequestMessage(HttpMethod.Get), CancellationToken.None);
+            var task = clientFixture.QClient.RequestAsync<int>(clientFixture.HttpClient, mc.GetHttpRequestMessage(HttpMethod.Get), CancellationToken.None);
             
             var exception = await Record.ExceptionAsync(() => task);
         
@@ -64,7 +64,7 @@ public class ClientTests
             var mc = new MessageCreator().SetEndpoint("api/users/");
             var cts = new CancellationTokenSource();
             var ct = cts.Token;
-            var task = clientFixture.QClient.RequestAsync<User>(mc.GetHttpRequestMessage(HttpMethod.Get), ct);
+            var task = clientFixture.QClient.RequestAsync<User>(clientFixture.HttpClient, mc.GetHttpRequestMessage(HttpMethod.Get), ct);
             Task[] tasks =  [task, cts.CancelAsync()];
             
             var exception = await Record.ExceptionAsync(() => Task.WhenAll(tasks));
@@ -79,7 +79,7 @@ public class ClientTests
             {
                 var mc = new MessageCreator().SetEndpoint("api/usersWithPagin/");
 
-                var packages = await clientFixture.QClient.RequestAsyncWithPagination(mc, clientFixture.PaginationShouldContinue, CancellationToken.None);
+                var packages = await clientFixture.QClient.RequestAsyncWithPagination(clientFixture.HttpClient, mc, clientFixture.PaginationShouldContinue, CancellationToken.None);
                 var users = packages.SelectMany(p => p.Users).ToArray();
                 var usersCount = users.Length;
                 
@@ -94,7 +94,7 @@ public class ClientTests
         public async Task NoStopLogicProvided_ThrowsNullReferenceException()
         {
             var mc = new MessageCreator().SetEndpoint("api/usersWithPagin/");
-            var task = clientFixture.QClient.RequestAsyncWithPagination(mc, clientFixture.PaginationAlwaysContinue, CancellationToken.None);
+            var task = clientFixture.QClient.RequestAsyncWithPagination(clientFixture.HttpClient, mc, clientFixture.PaginationAlwaysContinue, CancellationToken.None);
             
             var exception = await Record.ExceptionAsync(() => task);
            
